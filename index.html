@@ -3,319 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roblox Limited Filter</title>
+<title>Dakzz Nontrue Checker</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #0b0b0b;
-    color: #e0e0e0;
-    padding: 20px;
-  }
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  h1 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: #fff;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  .filters {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .filters input, .filters select {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #e0e0e0;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border 0.2s;
-  }
-  .filters input:focus, .filters select:focus {
-    border-color: #666;
-  }
-  .filters input::placeholder {
-    color: #666;
-  }
-  #searchInput {
-    flex: 1;
-    min-width: 200px;
-  }
-  .status {
-    font-size: 0.85rem;
-    color: #888;
-    margin-bottom: 16px;
-    min-height: 20px;
-  }
-  .item-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .item-card {
-    background: #141414;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 16px;
-    transition: transform 0.15s, border 0.15s;
-  }
-  .item-card:hover {
-    transform: translateY(-2px);
-    border-color: #444;
-  }
-  .item-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .item-acronym {
-    font-size: 0.75rem;
-    color: #666;
-    margin-bottom: 10px;
-  }
-  .item-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 0.8rem;
-  }
-  .stat-row {
-    display: flex;
-    justify-content: space-between;
-  }
-  .stat-label {
-    color: #777;
-  }
-  .stat-value {
-    color: #ccc;
-    font-weight: 600;
-  }
-  .stat-value.rap {
-    color: #4ade80;
-  }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-right: 4px;
-  }
-  .badge.rare { background: #7c3aed; color: #fff; }
-  .badge.projected { background: #2563eb; color: #fff; }
-  .badge.hyped { background: #dc2626; color: #fff; }
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-    font-size: 1rem;
-  }
-  .error {
-    text-align: center;
-    padding: 40px 20px;
-    color: #ef4444;
-    font-size: 0.9rem;
-  }
-  .pagination {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 32px;
-    flex-wrap: wrap;
-  }
-  .pagination button {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #ccc;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: background 0.15s;
-  }
-  .pagination button:hover:not(:disabled) {
-    background: #2a2a2a;
-  }
-  .pagination button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .pagination button.active {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: #0a0a0c; color: #e0e0e0; padding: 20px; }
+  .container { max-width: 800px; margin: 0 auto; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { background: #1e3a2f; color: #4ade80; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 1.2rem; }
+  .title h1 { font-size: 1.2rem; color: #fff; }
+  .title span { font-size: 0.8rem; color: #888; }
+  .header-right { display: flex; gap: 8px; }
+  .btn-header { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+  .btn-synced { border-color: #166534; color: #4ade80; background: #052e16; }
+
+  .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-bar input { flex: 1; background: #141414; border: 1px solid #333; color: #fff; padding: 14px 16px; border-radius: 12px; outline: none; font-size: 0.95rem; }
+  .search-bar button { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 14px; border-radius: 12px; cursor: pointer; }
+
+  .upload-area { background: #141414; border: 1px dashed #444; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; }
+  .upload-area input[type="file"] { display: none; }
+  .upload-btn { background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .upload-status { font-size: 0.85rem; color: #888; margin-top: 10px; }
+
+  .stats-card { background: linear-gradient(145deg, #14141a, #0d0d12); border: 1px solid #2a2a35; border-radius: 20px; padding: 24px; margin-bottom: 20px; }
+  .stats-top { display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .badge-overview { background: #2e1a47; color: #c084fc; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+  .stats-title { font-size: 0.85rem; color: #888; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
+  .stats-number { font-size: 3rem; font-weight: bold; color: #fff; margin-bottom: 8px; }
+  .stats-desc { font-size: 0.85rem; color: #666; }
+
+  .filter-row { display: flex; justify-content: space-between; align-items: center; background: #141414; border: 1px solid #222; padding: 16px; border-radius: 12px; margin-bottom: 12px; font-size: 0.9rem; color: #aaa; cursor: pointer; }
+
+  .chips { display: flex; gap: 8px; margin-bottom: 20px; }
+  .chip { background: #052e16; border: 1px solid #166534; color: #4ade80; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
+  .chip span { cursor: pointer; }
+
+  .account-card { background: #141414; border: 1px solid #222; border-radius: 16px; padding: 20px; display: flex; gap: 20px; margin-bottom: 16px; }
+  .avatar-box { width: 80px; height: 100px; background: #1a1a1a; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+  .acc-info { flex: 1; overflow: hidden; }
+  .acc-name { font-size: 1.1rem; font-weight: bold; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acc-username { font-size: 0.85rem; color: #888; margin-bottom: 12px; }
+  .acc-details { display: flex; gap: 16px; font-size: 0.8rem; color: #aaa; margin-bottom: 16px; flex-wrap: wrap; }
+  .acc-details span { display: flex; align-items: center; gap: 4px; }
+  
+  .acc-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-action { padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; }
+  .btn-usn { background: #10b981; color: #fff; flex: 1; justify-content: center; }
+  .btn-pw { background: #064e3b; color: #34d399; flex: 1; justify-content: center; border: 1px solid #065f46; }
+  .btn-mail { background: #10b981; color: #fff; padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; }
+  .btn-loc { background: #1e1b4b; color: #818cf8; padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; border: 1px solid #3730a3; }
+  .loading-text { text-align: center; color: #888; padding: 20px; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Roblox Limited Filter</h1>
-  <div class="filters">
-    <input type="text" id="searchInput" placeholder="Cari nama item / akronim...">
-    <select id="sortSelect">
-      <option value="rap_desc">RAP Tertinggi</option>
-      <option value="rap_asc">RAP Terendah</option>
-      <option value="value_desc">Value Tertinggi</option>
-      <option value="value_asc">Value Terendah</option>
-      <option value="name_asc">Nama A-Z</option>
-      <option value="name_desc">Nama Z-A</option>
-    </select>
-    <select id="filterSelect">
-      <option value="all">Semua Item</option>
-      <option value="rare">Rare</option>
-      <option value="projected">Projected</option>
-      <option value="hyped">Hyped</option>
-    </select>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">📦</div>
+      <div class="title">
+        <h1>Dakzz Nontrue</h1>
+        <span>WEB</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn-header">👤 Guest</button>
+      <button class="btn-header btn-synced">Synced</button>
+    </div>
   </div>
-  <div class="status" id="status">Memuat data...</div>
-  <div class="item-grid" id="itemGrid"></div>
-  <div class="pagination" id="pagination"></div>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Cari username, IP, item...">
+  </div>
+
+  <div class="upload-area">
+    <label for="fileInput" class="upload-btn">📁 Pilih File .txt</label>
+    <input type="file" id="fileInput" accept=".txt">
+    <div class="upload-status" id="uploadStatus">Format: user:pass:ip (satu baris satu akun)</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-top">
+      <span class="badge-overview">📈 OVERVIEW</span>
+    </div>
+    <div class="stats-title">TOTAL AKUN</div>
+    <div class="stats-number" id="totalAkun">0</div>
+    <div class="stats-desc" id="statsDesc">0 dicek · 0 belum · 0 not found · 0 private</div>
+  </div>
+
+  <div class="filter-row" style="cursor: default;">
+    <span>🔄 Status Pengecekan</span>
+    <span class="badge" id="statusCek" style="background: #1f1f24; color: #ddd; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem;">Idle</span>
+  </div>
+
+  <div class="chips">
+    <div class="chip">Dengan avatar <span>×</span></div>
+  </div>
+
+  <div id="accountList">
+    <div class="loading-text" id="emptyState">Belum ada data. Silakan upload file .txt dulu.</div>
+  </div>
+
 </div>
 
 <script>
-const API_URL = 'https://api.rolimons.com/items/v2/itemdetails';
-const ITEMS_PER_PAGE = 24;
+  // ==========================================
+  // GANTI URL INI PAKE URL CLOUDFLARE WORKER LO
+  // ==========================================
+  const WORKER_URL = "https://GANTI_PAKE_URL_WORKER_LO.workers.dev"; 
 
-let allItems = [];
-let filteredItems = [];
-let currentPage = 1;
+  let accountsData = [];
+  let filteredData = [];
 
-async function fetchItems() {
-  const status = document.getElementById('status');
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    const itemsMap = data.items || {};
-    allItems = Object.entries(itemsMap).map(([id, arr]) => ({
-      id: parseInt(id),
-      name: arr[0] || 'Unknown',
-      acronym: arr[1] || '',
-      rap: arr[2] || 0,
-      value: arr[3] || 0,
-      projected: arr[4] === 1,
-      rare: arr[5] === 1,
-      hyped: arr[6] === 1
-    }));
-
-    filteredItems = [...allItems];
-    status.textContent = 'Total ' + allItems.length + ' item ditemukan.';
-    render();
-  } catch (err) {
-    status.textContent = '';
-    document.getElementById('itemGrid').innerHTML =
-      '<div class="error">Gagal memuat data: ' + err.message + '<br>Coba refresh atau cek koneksi lo.</div>';
+  // Format angka
+  function formatNumber(n) {
+    return new Intl.NumberFormat('id-ID').format(n);
   }
-}
 
-function applyFilters() {
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  const filter = document.getElementById('filterSelect').value;
-  const sort = document.getElementById('sortSelect').value;
+  // Fungsi buat render kartu
+  function renderCard(data, index) {
+    const list = document.getElementById('accountList');
+    const card = document.createElement('div');
+    card.className = 'account-card';
+    card.innerHTML = `
+      <div class="avatar-box">
+        <img src="${data.avatar || 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F7B3D3C633D41D48F665A26B272E9B97-Png/150/150/AvatarHeadshot/Webp/noFilter'}" alt="Avatar" onerror="this.src='https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F7B3D3C633D41D48F665A26B272E9B97-Png/150/150/AvatarHeadshot/Webp/noFilter'">
+      </div>
+      <div class="acc-info">
+        <div class="acc-name">${data.displayName || 'UNKNOWN'}</div>
+        <div class="acc-username">@${data.username || 'unknown'}</div>
+        <div class="acc-details">
+          <span>📍 ${data.country || 'Unknown'}</span>
+          <span>🌐 ${data.ip || '0.0.0.0'}</span>
+        </div>
+        <div class="acc-actions">
+          <button class="btn-loc" onclick="alert('Fitur lokasi belum tersedia')">📍 Lokasi ⌄</button>
+          <button class="btn-mail" onclick="alert('Fitur mail belum tersedia')">MAIL</button>
+        </div>
+        <div class="acc-actions" style="margin-top:10px;">
+          <button class="btn-action btn-usn" onclick="navigator.clipboard.writeText('${data.username}'); alert('Username dicopy!')">📋 USN</button>
+          <button class="btn-action btn-pw" onclick="navigator.clipboard.writeText('${data.password || ''}'); alert('Password dicopy!')">🔑 PW</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  }
 
-  filteredItems = allItems.filter(item => {
-    if (query && !item.name.toLowerCase().includes(query) && !item.acronym.toLowerCase().includes(query)) {
-      return false;
+  // Fungsi nembak API Roblox lewat Worker
+  async function fetchRobloxData(username) {
+    try {
+      // 1. Cari ID berdasarkan Username
+      const resId = await fetch(`${WORKER_URL}/?url=${encodeURIComponent('https://users.roblox.com/v1/usernames/users')}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
+      });
+      
+      const dataId = await resId.json();
+      
+      if (!dataId.data || dataId.data.length === 0) {
+        return { username, displayName: 'Not Found', avatar: null, status: 'not_found' };
+      }
+
+      const userId = dataId.data[0].id;
+      const displayName = dataId.data[0].displayName;
+
+      // 2. Ambil Avatar
+      const resAvatar = await fetch(`${WORKER_URL}/?url=${encodeURIComponent('https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=' + userId + '&size=150x150&format=Png&isCircular=false')}`);
+      const dataAvatar = await resAvatar.json();
+      const avatarUrl = dataAvatar.data && dataAvatar.data[0] ? dataAvatar.data[0].imageUrl : null;
+
+      return { username, displayName, avatar: avatarUrl, status: 'success' };
+
+    } catch (err) {
+      console.error("Error fetch:", username, err);
+      return { username, displayName: 'Error', avatar: null, status: 'error' };
     }
-    if (filter === 'rare' && !item.rare) return false;
-    if (filter === 'projected' && !item.projected) return false;
-    if (filter === 'hyped' && !item.hyped) return false;
-    return true;
+  }
+
+  // Proses file txt
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const content = e.target.result;
+      const lines = content.split('\n').filter(line => line.trim() !== '');
+      
+      accountsData = lines.map(line => {
+        const parts = line.split(':');
+        return {
+          username: parts[0] ? parts[0].trim() : 'Unknown',
+          password: parts[1] ? parts[1].trim() : '',
+          ip: parts[2] ? parts[2].trim() : ''
+        };
+      });
+
+      document.getElementById('totalAkun').innerText = accountsData.length;
+      document.getElementById('uploadStatus').innerText = `Berhasil load ${accountsData.length} akun. Mulai ngecek...`;
+      document.getElementById('statusCek').innerText = "Checking...";
+      document.getElementById('emptyState').style.display = 'none';
+      
+      const list = document.getElementById('accountList');
+      list.innerHTML = '<div class="loading-text">Sedang narik data dari Roblox (mungkin butuh waktu beberapa menit)...</div>';
+
+      // Proses satu per satu biar ga kena rate limit parah
+      let processedCount = 0;
+      let successCount = 0;
+      let notFoundCount = 0;
+
+      for (let i = 0; i < accountsData.length; i++) {
+        const acc = accountsData[i];
+        
+        // Delay 1 detik tiap request biar aman
+        await new Promise(r => setTimeout(r, 1000));
+        
+        const result = await fetchRobloxData(acc.username);
+        
+        if (result.status === 'success') successCount++;
+        if (result.status === 'not_found') notFoundCount++;
+
+        const mergedData = { ...acc, ...result };
+        
+        if (i === 0) list.innerHTML = ''; // Hapus loading text di awal
+        renderCard(mergedData, i);
+
+        processedCount++;
+        document.getElementById('statusCek').innerText = `Checking ${processedCount}/${accountsData.length}`;
+        document.getElementById('statsDesc').innerText = `${processedCount} dicek · ${accountsData.length - processedCount} belum · ${notFoundCount} not found · 0 private`;
+      }
+
+      document.getElementById('statusCek').innerText = "Selesai";
+      document.getElementById('uploadStatus').innerText = `Selesai ngecek ${accountsData.length} akun.`;
+    };
+    reader.readAsText(file);
   });
 
-  filteredItems.sort((a, b) => {
-    switch (sort) {
-      case 'rap_desc': return b.rap - a.rap;
-      case 'rap_asc': return a.rap - b.rap;
-      case 'value_desc': return b.value - a.value;
-      case 'value_asc': return a.value - b.value;
-      case 'name_asc': return a.name.localeCompare(b.name);
-      case 'name_desc': return b.name.localeCompare(a.name);
-      default: return 0;
-    }
+  // Fitur Search
+  document.getElementById('searchInput').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.account-card');
+    
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      if (text.includes(query)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
   });
-
-  currentPage = 1;
-  render();
-}
-
-function render() {
-  const grid = document.getElementById('itemGrid');
-  const pag = document.getElementById('pagination');
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE) || 1;
-
-  if (currentPage > totalPages) currentPage = totalPages;
-
-  const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const pageItems = filteredItems.slice(start, start + ITEMS_PER_PAGE);
-
-  if (pageItems.length === 0) {
-    grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">Ga ada item yang cocok sama filter lo.</div>';
-    pag.innerHTML = '';
-    return;
-  }
-
-  grid.innerHTML = pageItems.map(item => {
-    let badges = '';
-    if (item.rare) badges += '<span class="badge rare">Rare</span>';
-    if (item.projected) badges += '<span class="badge projected">Projected</span>';
-    if (item.hyped) badges += '<span class="badge hyped">Hyped</span>';
-
-    return '<div class="item-card">' +
-      '<div class="item-name" title="' + item.name + '">' + item.name + '</div>' +
-      (item.acronym ? '<div class="item-acronym">' + item.acronym + '</div>' : '') +
-      '<div>' + badges + '</div>' +
-      '<div class="item-stats">' +
-        '<div class="stat-row"><span class="stat-label">RAP</span><span class="stat-value rap">' + formatNumber(item.rap) + '</span></div>' +
-        '<div class="stat-row"><span class="stat-label">Value</span><span class="stat-value">' + formatNumber(item.value) + '</span></div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-
-  let pagHTML = '';
-  pagHTML += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="goPage(' + (currentPage - 1) + ')">‹ Prev</button>';
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-      pagHTML += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
-    } else if (i === currentPage - 3 || i === currentPage + 3) {
-      pagHTML += '<button disabled>...</button>';
-    }
-  }
-  pagHTML += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="goPage(' + (currentPage + 1) + ')">Next ›</button>';
-  pag.innerHTML = pagHTML;
-}
-
-function goPage(page) {
-  currentPage = page;
-  render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function formatNumber(n) {
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-  return n.toString();
-}
-
-document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('sortSelect').addEventListener('change', applyFilters);
-document.getElementById('filterSelect').addEventListener('change', applyFilters);
-
-fetchItems();
 </script>
 </body>
 </html>
