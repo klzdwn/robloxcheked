@@ -20,7 +20,6 @@
 
   .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
   .search-bar input { flex: 1; background: #141414; border: 1px solid #333; color: #fff; padding: 14px 16px; border-radius: 12px; outline: none; font-size: 0.95rem; }
-  .search-bar button { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 14px; border-radius: 12px; cursor: pointer; }
 
   .upload-area { background: #141414; border: 1px dashed #444; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; }
   .upload-area input[type="file"] { display: none; }
@@ -109,21 +108,14 @@
 </div>
 
 <script>
-  // ==========================================
-  // GANTI URL INI PAKE URL CLOUDFLARE WORKER LO
-  // ==========================================
-  const WORKER_URL = "https://GANTI_PAKE_URL_WORKER_LO.workers.dev"; 
+  // API KEY SCRAPINGBEE LO
+  const SCRAPINGBEE_API_KEY = "B0ZXSIG1CIC2FOF5S4ZRCK3LV3GRPRT3LCZMVDR7L12EOCOBUXCCUNVI48GLWX6ABXG5S0SZRUV1UMA8"; 
+  
+  const SCRAPINGBEE_URL = "https://app.scrapingbee.com/api/v1/";
 
   let accountsData = [];
-  let filteredData = [];
 
-  // Format angka
-  function formatNumber(n) {
-    return new Intl.NumberFormat('id-ID').format(n);
-  }
-
-  // Fungsi buat render kartu
-  function renderCard(data, index) {
+  function renderCard(data) {
     const list = document.getElementById('accountList');
     const card = document.createElement('div');
     card.className = 'account-card';
@@ -138,10 +130,6 @@
           <span>📍 ${data.country || 'Unknown'}</span>
           <span>🌐 ${data.ip || '0.0.0.0'}</span>
         </div>
-        <div class="acc-actions">
-          <button class="btn-loc" onclick="alert('Fitur lokasi belum tersedia')">📍 Lokasi ⌄</button>
-          <button class="btn-mail" onclick="alert('Fitur mail belum tersedia')">MAIL</button>
-        </div>
         <div class="acc-actions" style="margin-top:10px;">
           <button class="btn-action btn-usn" onclick="navigator.clipboard.writeText('${data.username}'); alert('Username dicopy!')">📋 USN</button>
           <button class="btn-action btn-pw" onclick="navigator.clipboard.writeText('${data.password || ''}'); alert('Password dicopy!')">🔑 PW</button>
@@ -151,39 +139,47 @@
     list.appendChild(card);
   }
 
-  // Fungsi nembak API Roblox lewat Worker
   async function fetchRobloxData(username) {
     try {
-      // 1. Cari ID berdasarkan Username
-      const resId = await fetch(`${WORKER_URL}/?url=${encodeURIComponent('https://users.roblox.com/v1/usernames/users')}`, {
+      const robloxUrl = encodeURIComponent('https://users.roblox.com/v1/usernames/users');
+      
+      const resId = await fetch(`${SCRAPINGBEE_URL}?api_key=${SCRAPINGBEE_API_KEY}&url=${robloxUrl}&render_js=false`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
       });
       
-      const dataId = await resId.json();
+      const textData = await resId.text();
+      let dataId;
       
+      try {
+        dataId = JSON.parse(textData);
+      } catch (e) {
+        throw new Error("Gagal konek ke ScrapingBee. Cek API Key lo. Pesan: " + textData.substring(0, 80));
+      }
+
       if (!dataId.data || dataId.data.length === 0) {
-        return { username, displayName: 'Not Found', avatar: null, status: 'not_found' };
+        return { username, displayName: 'Not Found', avatar: null };
       }
 
       const userId = dataId.data[0].id;
       const displayName = dataId.data[0].displayName;
 
-      // 2. Ambil Avatar
-      const resAvatar = await fetch(`${WORKER_URL}/?url=${encodeURIComponent('https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=' + userId + '&size=150x150&format=Png&isCircular=false')}`);
+      const avatarUrlTarget = encodeURIComponent('https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=' + userId + '&size=150x150&format=Png&isCircular=false');
+      
+      const resAvatar = await fetch(`${SCRAPINGBEE_URL}?api_key=${SCRAPINGBEE_API_KEY}&url=${avatarUrlTarget}&render_js=false`);
       const dataAvatar = await resAvatar.json();
       const avatarUrl = dataAvatar.data && dataAvatar.data[0] ? dataAvatar.data[0].imageUrl : null;
 
-      return { username, displayName, avatar: avatarUrl, status: 'success' };
+      return { username, displayName, avatar: avatarUrl };
 
     } catch (err) {
-      console.error("Error fetch:", username, err);
-      return { username, displayName: 'Error', avatar: null, status: 'error' };
+      alert("BRO ERROR NIH: \n\n" + err.message);
+      console.error(err);
+      return { username, displayName: 'Error System', avatar: null };
     }
   }
 
-  // Proses file txt
   document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -203,58 +199,34 @@
       });
 
       document.getElementById('totalAkun').innerText = accountsData.length;
-      document.getElementById('uploadStatus').innerText = `Berhasil load ${accountsData.length} akun. Mulai ngecek...`;
+      document.getElementById('uploadStatus').innerText = `Load ${accountsData.length} akun. Mulai ngecek...`;
       document.getElementById('statusCek').innerText = "Checking...";
       document.getElementById('emptyState').style.display = 'none';
       
       const list = document.getElementById('accountList');
-      list.innerHTML = '<div class="loading-text">Sedang narik data dari Roblox (mungkin butuh waktu beberapa menit)...</div>';
+      list.innerHTML = '<div class="loading-text">Narik data Roblox via ScrapingBee...</div>';
 
-      // Proses satu per satu biar ga kena rate limit parah
       let processedCount = 0;
-      let successCount = 0;
-      let notFoundCount = 0;
 
-      for (let i = 0; i < accountsData.length; i++) {
+      const limitCek = Math.min(accountsData.length, 3); 
+
+      for (let i = 0; i < limitCek; i++) {
         const acc = accountsData[i];
-        
-        // Delay 1 detik tiap request biar aman
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 2000)); // Jeda 2 detik biar ga di-rate limit
         
         const result = await fetchRobloxData(acc.username);
-        
-        if (result.status === 'success') successCount++;
-        if (result.status === 'not_found') notFoundCount++;
-
         const mergedData = { ...acc, ...result };
         
-        if (i === 0) list.innerHTML = ''; // Hapus loading text di awal
-        renderCard(mergedData, i);
+        if (i === 0) list.innerHTML = ''; 
+        renderCard(mergedData);
 
         processedCount++;
-        document.getElementById('statusCek').innerText = `Checking ${processedCount}/${accountsData.length}`;
-        document.getElementById('statsDesc').innerText = `${processedCount} dicek · ${accountsData.length - processedCount} belum · ${notFoundCount} not found · 0 private`;
+        document.getElementById('statusCek').innerText = `Checking ${processedCount}/${limitCek}`;
       }
 
-      document.getElementById('statusCek').innerText = "Selesai";
-      document.getElementById('uploadStatus').innerText = `Selesai ngecek ${accountsData.length} akun.`;
+      document.getElementById('statusCek').innerText = "Selesai Tes";
     };
     reader.readAsText(file);
-  });
-
-  // Fitur Search
-  document.getElementById('searchInput').addEventListener('input', function(e) {
-    const query = e.target.value.toLowerCase();
-    const cards = document.querySelectorAll('.account-card');
-    
-    cards.forEach(card => {
-      const text = card.innerText.toLowerCase();
-      if (text.includes(query)) {
-        card.style.display = 'flex';
-      } else {
-        card.style.display = 'none';
-      }
-    });
   });
 </script>
 </body>
