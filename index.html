@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Limited Filter</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0b0b0b;
+    color: #e0e0e0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .filters {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .filters input, .filters select {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #e0e0e0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .filters input:focus, .filters select:focus {
+    border-color: #666;
+  }
+  .filters input::placeholder {
+    color: #666;
+  }
+  #searchInput {
+    flex: 1;
+    min-width: 200px;
+  }
+  .status {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 16px;
+    min-height: 20px;
+  }
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .item-card {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 16px;
+    transition: transform 0.15s, border 0.15s;
+  }
+  .item-card:hover {
+    transform: translateY(-2px);
+    border-color: #444;
+  }
+  .item-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-acronym {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  .item-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+  }
+  .stat-label {
+    color: #777;
+  }
+  .stat-value {
+    color: #ccc;
+    font-weight: 600;
+  }
+  .stat-value.rap {
+    color: #4ade80;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .badge.rare { background: #7c3aed; color: #fff; }
+  .badge.projected { background: #2563eb; color: #fff; }
+  .badge.hyped { background: #dc2626; color: #fff; }
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+    font-size: 1rem;
+  }
+  .error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #ef4444;
+    font-size: 0.9rem;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .pagination button {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #ccc;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+  }
+  .pagination button:hover:not(:disabled) {
+    background: #2a2a2a;
+  }
+  .pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .pagination button.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Roblox Limited Filter</h1>
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Cari nama item / akronim...">
+    <select id="sortSelect">
+      <option value="rap_desc">RAP Tertinggi</option>
+      <option value="rap_asc">RAP Terendah</option>
+      <option value="value_desc">Value Tertinggi</option>
+      <option value="value_asc">Value Terendah</option>
+      <option value="name_asc">Nama A-Z</option>
+      <option value="name_desc">Nama Z-A</option>
+    </select>
+    <select id="filterSelect">
+      <option value="all">Semua Item</option>
+      <option value="rare">Rare</option>
+      <option value="projected">Projected</option>
+      <option value="hyped">Hyped</option>
+    </select>
+  </div>
+  <div class="status" id="status">Memuat data...</div>
+  <div class="item-grid" id="itemGrid"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+const API_URL = 'https://api.rolimons.com/items/v2/itemdetails';
+const ITEMS_PER_PAGE = 24;
+
+let allItems = [];
+let filteredItems = [];
+let currentPage = 1;
+
+async function fetchItems() {
+  const status = document.getElementById('status');
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    const itemsMap = data.items || {};
+    allItems = Object.entries(itemsMap).map(([id, arr]) => ({
+      id: parseInt(id),
+      name: arr[0] || 'Unknown',
+      acronym: arr[1] || '',
+      rap: arr[2] || 0,
+      value: arr[3] || 0,
+      projected: arr[4] === 1,
+      rare: arr[5] === 1,
+      hyped: arr[6] === 1
+    }));
+
+    filteredItems = [...allItems];
+    status.textContent = 'Total ' + allItems.length + ' item ditemukan.';
+    render();
+  } catch (err) {
+    status.textContent = '';
+    document.getElementById('itemGrid').innerHTML =
+      '<div class="error">Gagal memuat data: ' + err.message + '<br>Coba refresh atau cek koneksi lo.</div>';
+  }
+}
+
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const filter = document.getElementById('filterSelect').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  filteredItems = allItems.filter(item => {
+    if (query && !item.name.toLowerCase().includes(query) && !item.acronym.toLowerCase().includes(query)) {
+      return false;
+    }
+    if (filter === 'rare' && !item.rare) return false;
+    if (filter === 'projected' && !item.projected) return false;
+    if (filter === 'hyped' && !item.hyped) return false;
+    return true;
+  });
+
+  filteredItems.sort((a, b) => {
+    switch (sort) {
+      case 'rap_desc': return b.rap - a.rap;
+      case 'rap_asc': return a.rap - b.rap;
+      case 'value_desc': return b.value - a.value;
+      case 'value_asc': return a.value - b.value;
+      case 'name_asc': return a.name.localeCompare(b.name);
+      case 'name_desc': return b.name.localeCompare(a.name);
+      default: return 0;
+    }
+  });
+
+  currentPage = 1;
+  render();
+}
+
+function render() {
+  const grid = document.getElementById('itemGrid');
+  const pag = document.getElementById('pagination');
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE) || 1;
+
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = filteredItems.slice(start, start + ITEMS_PER_PAGE);
+
+  if (pageItems.length === 0) {
+    grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">Ga ada item yang cocok sama filter lo.</div>';
+    pag.innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = pageItems.map(item => {
+    let badges = '';
+    if (item.rare) badges += '<span class="badge rare">Rare</span>';
+    if (item.projected) badges += '<span class="badge projected">Projected</span>';
+    if (item.hyped) badges += '<span class="badge hyped">Hyped</span>';
+
+    return '<div class="item-card">' +
+      '<div class="item-name" title="' + item.name + '">' + item.name + '</div>' +
+      (item.acronym ? '<div class="item-acronym">' + item.acronym + '</div>' : '') +
+      '<div>' + badges + '</div>' +
+      '<div class="item-stats">' +
+        '<div class="stat-row"><span class="stat-label">RAP</span><span class="stat-value rap">' + formatNumber(item.rap) + '</span></div>' +
+        '<div class="stat-row"><span class="stat-label">Value</span><span class="stat-value">' + formatNumber(item.value) + '</span></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  let pagHTML = '';
+  pagHTML += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="goPage(' + (currentPage - 1) + ')">‹ Prev</button>';
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+      pagHTML += '<button class="' + (i === currentPage ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+    } else if (i === currentPage - 3 || i === currentPage + 3) {
+      pagHTML += '<button disabled>...</button>';
+    }
+  }
+  pagHTML += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="goPage(' + (currentPage + 1) + ')">Next ›</button>';
+  pag.innerHTML = pagHTML;
+}
+
+function goPage(page) {
+  currentPage = page;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('sortSelect').addEventListener('change', applyFilters);
+document.getElementById('filterSelect').addEventListener('change', applyFilters);
+
+fetchItems();
+</script>
+</body>
+</html>
